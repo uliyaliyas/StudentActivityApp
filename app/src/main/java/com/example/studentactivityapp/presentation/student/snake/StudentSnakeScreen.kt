@@ -3,7 +3,6 @@ package com.example.studentactivityapp.presentation.student.snake
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -85,6 +84,8 @@ fun StudentSnakeScreen(
 
         Spacer(modifier = Modifier.height(6.dp))
 
+        val currentMessage = uiState.message
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,10 +104,10 @@ fun StudentSnakeScreen(
                 )
             }
 
-            if (uiState.gameState == GameState.GAME_OVER && uiState.message != null) {
+            if (uiState.gameState == GameState.GAME_OVER && currentMessage != null) {
                 Text(
-                    text = uiState.message,
-                    color = if (uiState.message.startsWith("+")) Color(0xFF4CAF50)
+                    text = currentMessage,
+                    color = if (currentMessage.startsWith("+")) Color(0xFF4CAF50)
                             else Color(0xFF7A6F9B),
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp
