@@ -16,6 +16,7 @@ import com.example.studentactivityapp.navigation.AdminBottomNavItem
 import com.example.studentactivityapp.navigation.Screen
 import com.example.studentactivityapp.presentation.admin.addtask.AdminAddTaskScreen
 import com.example.studentactivityapp.presentation.admin.home.AdminHomeScreen
+import com.example.studentactivityapp.presentation.admin.rating.AdminRatingScreen
 import com.example.studentactivityapp.presentation.admin.statistics.AdminStatisticsScreen
 import com.example.studentactivityapp.presentation.admin.studentprofile.AdminStudentProfileScreen
 import com.example.studentactivityapp.presentation.admin.students.AdminStudentsScreen
@@ -31,6 +32,7 @@ fun AdminMainScreen(
         AdminBottomNavItem.Home,
         AdminBottomNavItem.Tasks,
         AdminBottomNavItem.Students,
+        AdminBottomNavItem.Rating,
         AdminBottomNavItem.Statistics
     )
 
@@ -111,7 +113,6 @@ fun AdminMainScreen(
 
             composable(Screen.AdminStudentProfile.route) { backStackEntry ->
                 val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
-
                 AdminStudentProfileScreen(
                     studentId = studentId,
                     innerPadding = innerPadding,
@@ -119,6 +120,10 @@ fun AdminMainScreen(
                         navController.popBackStack()
                     }
                 )
+            }
+
+            composable(Screen.AdminRating.route) {
+                AdminRatingScreen(innerPadding = innerPadding)
             }
 
             composable(Screen.AdminStatistics.route) {
