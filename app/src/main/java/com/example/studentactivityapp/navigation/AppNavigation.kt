@@ -5,9 +5,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.studentactivityapp.presentation.admin.AdminMainScreen
-import com.example.studentactivityapp.presentation.admin.addtask.AdminAddTaskScreen
-import com.example.studentactivityapp.presentation.admin.rating.AdminRatingScreen
-import com.example.studentactivityapp.presentation.admin.studentprofile.AdminStudentProfileScreen
 import com.example.studentactivityapp.presentation.auth.AuthViewModel
 import com.example.studentactivityapp.presentation.auth.LoginScreen
 import com.example.studentactivityapp.presentation.auth.RegisterScreen
@@ -92,19 +89,13 @@ fun AppNavigation() {
         }
 
         composable(Screen.AdminHome.route) {
-            AdminMainScreen()
-        }
-
-        composable(Screen.AdminAddTask.route) {
-            AdminAddTaskScreen()
-        }
-
-        composable(Screen.AdminStudentProfile.route) {
-            AdminStudentProfileScreen()
-        }
-
-        composable(Screen.AdminRating.route) {
-            AdminRatingScreen()
+            AdminMainScreen(
+                onLogoutClick = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0)
+                    }
+                }
+            )
         }
     }
 }

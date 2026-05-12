@@ -10,10 +10,50 @@ class TaskRepository {
     private val auth = FirebaseModule.auth
     private val firestore = FirebaseModule.firestore
 
-    suspend fun getTasks(): Result<List<Task>> {
+    suspend fun getAllTasks(): Result<List<Task>> {
         return try {
             val snapshot = firestore.collection("tasks").get().await()
 
+            val tasks = snapshot.documents.map { doc ->
+                Task(
+                    id = doc.id,
+                    title = doc.getString("title") ?: "",
+                    description = doc.getString("description") ?: "",
+                    points = (doc.getLong("points") ?: 0).toInt()
+                )
+            }
+
+            Result.success(tasks)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createTask(
+        title: String,
+        description: String,
+        points: Int
+    ): Result<Unit> {
+        return try {
+            val task = hashMapOf(
+                "title" to title,
+                "description" to description,
+                "points" to points
+            )
+
+            firestore.collection("tasks")
+                .add(task)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTasks(): Result<List<Task>> {
+        return try {
+            val snapshot = firestore.collection("tasks").get().await()
             val uid = auth.currentUser?.uid ?: throw Exception("Пользователь не найден")
 
             val completedSnapshot = firestore.collection("users")

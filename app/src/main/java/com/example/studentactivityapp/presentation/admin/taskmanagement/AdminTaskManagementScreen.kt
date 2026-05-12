@@ -5,44 +5,57 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Task
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.studentactivityapp.data.model.Task
 
 @Composable
 fun AdminTaskManagementScreen(
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    onAddTaskClick: () -> Unit,
+    viewModel: AdminTaskManagementViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadTasks()
+    }
+
     val gradient = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFF7F3FF),
-            Color(0xFFFFFFFF)
+            Color.White
         )
     )
 
@@ -51,67 +64,94 @@ fun AdminTaskManagementScreen(
             .fillMaxSize()
             .background(gradient)
             .padding(innerPadding)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Text(
-            text = "Управление заданиями",
+            text = "Задания",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2D1B69)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Редактируй и контролируй задания",
-            style = MaterialTheme.typography.bodyMedium,
+            text = "Создание и просмотр заданий для студентов",
             color = Color(0xFF7A6F9B)
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { },
-            modifier = Modifier.fillMaxWidth(),
+            onClick = onAddTaskClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
             shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B61FF))
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF7B61FF)
+            )
         ) {
-            Text("Создать новое задание")
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = "Создать новое задание",
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AdminTaskCard("Посещение 5 занятий", "100", "Посещение")
-        Spacer(modifier = Modifier.height(12.dp))
-        AdminTaskCard("Комментарий в группе ВК", "50", "Комментарий")
-        Spacer(modifier = Modifier.height(12.dp))
-        AdminTaskCard("Участие в мероприятии", "150", "Кастом")
+        if (uiState.isLoading) {
+            Text(text = "Загрузка...", color = Color.Gray)
+        }
+
+        uiState.error?.let {
+            Text(text = it, color = Color.Red)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (uiState.tasks.isEmpty() && !uiState.isLoading) {
+            Text(
+                text = "Пока нет заданий",
+                color = Color.Gray
+            )
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(uiState.tasks) { task ->
+                    AdminTaskItem(task = task)
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun AdminTaskCard(
-    title: String,
-    points: String,
-    type: String
+private fun AdminTaskItem(
+    task: Task
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .background(Color(0xFFEDE5FF), RoundedCornerShape(14.dp)),
+                        .size(48.dp)
+                        .background(Color(0xFFEDE5FF), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Task,
+                        imageVector = Icons.Default.TaskAlt,
                         contentDescription = null,
                         tint = Color(0xFF7B61FF)
                     )
@@ -120,32 +160,34 @@ private fun AdminTaskCard(
                 Spacer(modifier = Modifier.size(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = title, fontWeight = FontWeight.Bold, color = Color(0xFF2D1B69))
                     Text(
-                        text = "$points баллов • $type",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF8A84A0)
+                        text = task.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D1B69)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = task.description,
+                        color = Color(0xFF7A6F9B)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFFF1EBFF)
             ) {
-                TextButton(onClick = { }) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text("Редактировать")
-                }
-
-                TextButton(onClick = { }) {
-                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text("Удалить", color = Color.Red)
-                }
+                Text(
+                    text = "+${task.points} баллов",
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    color = Color(0xFF7B61FF),
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

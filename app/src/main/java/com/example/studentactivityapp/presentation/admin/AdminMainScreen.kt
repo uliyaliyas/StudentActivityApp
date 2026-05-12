@@ -14,13 +14,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.studentactivityapp.navigation.AdminBottomNavItem
 import com.example.studentactivityapp.navigation.Screen
+import com.example.studentactivityapp.presentation.admin.addtask.AdminAddTaskScreen
 import com.example.studentactivityapp.presentation.admin.home.AdminHomeScreen
 import com.example.studentactivityapp.presentation.admin.statistics.AdminStatisticsScreen
+import com.example.studentactivityapp.presentation.admin.studentprofile.AdminStudentProfileScreen
 import com.example.studentactivityapp.presentation.admin.students.AdminStudentsScreen
 import com.example.studentactivityapp.presentation.admin.taskmanagement.AdminTaskManagementScreen
 
 @Composable
-fun AdminMainScreen() {
+fun AdminMainScreen(
+    onLogoutClick: () -> Unit
+) {
     val navController = rememberNavController()
 
     val items = listOf(
@@ -67,14 +71,56 @@ fun AdminMainScreen() {
             startDestination = Screen.AdminHome.route
         ) {
             composable(Screen.AdminHome.route) {
-                AdminHomeScreen(innerPadding = innerPadding)
+                AdminHomeScreen(
+                    innerPadding = innerPadding,
+                    onLogoutClick = onLogoutClick
+                )
             }
+
             composable(Screen.AdminTaskManagement.route) {
-                AdminTaskManagementScreen(innerPadding = innerPadding)
+                AdminTaskManagementScreen(
+                    innerPadding = innerPadding,
+                    onAddTaskClick = {
+                        navController.navigate(Screen.AdminAddTask.route)
+                    }
+                )
             }
+
+            composable(Screen.AdminAddTask.route) {
+                AdminAddTaskScreen(
+                    innerPadding = innerPadding,
+                    onTaskSaved = {
+                        navController.popBackStack()
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             composable(Screen.AdminStudents.route) {
-                AdminStudentsScreen(innerPadding = innerPadding)
+                AdminStudentsScreen(
+                    innerPadding = innerPadding,
+                    onStudentClick = { studentId ->
+                        navController.navigate(
+                            Screen.AdminStudentProfile.createRoute(studentId)
+                        )
+                    }
+                )
             }
+
+            composable(Screen.AdminStudentProfile.route) { backStackEntry ->
+                val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
+
+                AdminStudentProfileScreen(
+                    studentId = studentId,
+                    innerPadding = innerPadding,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             composable(Screen.AdminStatistics.route) {
                 AdminStatisticsScreen(innerPadding = innerPadding)
             }
