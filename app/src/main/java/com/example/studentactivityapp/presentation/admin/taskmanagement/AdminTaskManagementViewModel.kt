@@ -35,4 +35,14 @@ class AdminTaskManagementViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteTask(taskId: String) {
+        viewModelScope.launch {
+            repository.deleteTask(taskId).onSuccess {
+                loadTasks()
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(error = error.message ?: "Ошибка удаления")
+            }
+        }
+    }
 }

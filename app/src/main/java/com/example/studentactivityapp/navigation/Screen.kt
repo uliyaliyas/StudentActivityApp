@@ -27,4 +27,6 @@ sealed class Screen(val route: String) {
             return "admin_student_profile/$studentId"
         }
     }
+
+    data object AdminRewards : Screen("admin_rewards")
 }

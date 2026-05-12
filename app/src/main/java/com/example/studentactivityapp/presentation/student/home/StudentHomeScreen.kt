@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -27,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StudentHomeScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    onRewardsClick: () -> Unit = {},
     viewModel: StudentViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -175,6 +178,46 @@ fun StudentHomeScreen(
                 iconColor = Color(0xFF43A047),
                 icon = Icons.Default.TaskAlt
             )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Surface(
+            onClick = onRewardsClick,
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFFEDE5FF),
+            shadowElevation = 4.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CardGiftcard,
+                    contentDescription = null,
+                    tint = Color(0xFF7B61FF),
+                    modifier = Modifier.size(26.dp)
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Магазин наград",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D1B69)
+                    )
+                    Text(
+                        text = "Потрать баллы на приятные бонусы",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF7A6F9B)
+                    )
+                }
+                Text(
+                    text = "→",
+                    color = Color(0xFF7B61FF),
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(14.dp))

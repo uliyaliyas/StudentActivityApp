@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 data class StudentUiState(
     val isLoading: Boolean = false,
     val user: User? = null,
-    val error: String? = null
+    val error: String? = null,
+    val nameUpdated: Boolean = false
 )
 
 class StudentViewModel : ViewModel() {
@@ -34,5 +35,21 @@ class StudentViewModel : ViewModel() {
                 _uiState.value = StudentUiState(error = error.message ?: "Ошибка загрузки")
             }
         }
+    }
+
+    fun updateUserName(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            repository.updateUserName(name).onSuccess {
+                val updatedUser = _uiState.value.user?.copy(name = name)
+                _uiState.value = _uiState.value.copy(user = updatedUser, nameUpdated = true)
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(error = error.message ?: "Ошибка сохранения")
+            }
+        }
+    }
+
+    fun clearNameUpdated() {
+        _uiState.value = _uiState.value.copy(nameUpdated = false)
     }
 }

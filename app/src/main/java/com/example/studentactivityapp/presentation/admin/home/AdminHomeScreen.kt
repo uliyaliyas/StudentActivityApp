@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -27,6 +28,7 @@ import com.example.studentactivityapp.presentation.auth.AuthViewModel
 fun AdminHomeScreen(
     innerPadding: PaddingValues,
     onLogoutClick: () -> Unit,
+    onRewardsClick: () -> Unit = {},
     authViewModel: AuthViewModel = viewModel(),
     viewModel: AdminHomeViewModel = viewModel()
 ) {
@@ -106,7 +108,30 @@ fun AdminHomeScreen(
             Text(text = it, color = Color.Red)
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = onRewardsClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF7B61FF)
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.CardGiftcard,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = "Управление наградами",
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {

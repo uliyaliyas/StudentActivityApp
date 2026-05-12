@@ -116,6 +116,15 @@ class TaskRepository {
         }
     }
 
+    suspend fun deleteTask(taskId: String): Result<Unit> {
+        return try {
+            firestore.collection("tasks").document(taskId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getCompletedTasks(): Result<List<CompletedTask>> {
         return try {
             val uid = auth.currentUser?.uid ?: throw Exception("Пользователь не найден")

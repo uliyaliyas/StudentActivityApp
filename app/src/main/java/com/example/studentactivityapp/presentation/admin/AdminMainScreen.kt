@@ -16,6 +16,8 @@ import com.example.studentactivityapp.navigation.AdminBottomNavItem
 import com.example.studentactivityapp.navigation.Screen
 import com.example.studentactivityapp.presentation.admin.addtask.AdminAddTaskScreen
 import com.example.studentactivityapp.presentation.admin.home.AdminHomeScreen
+import com.example.studentactivityapp.presentation.admin.rating.AdminRatingScreen
+import com.example.studentactivityapp.presentation.admin.rewards.AdminRewardsScreen
 import com.example.studentactivityapp.presentation.admin.statistics.AdminStatisticsScreen
 import com.example.studentactivityapp.presentation.admin.studentprofile.AdminStudentProfileScreen
 import com.example.studentactivityapp.presentation.admin.students.AdminStudentsScreen
@@ -31,7 +33,8 @@ fun AdminMainScreen(
         AdminBottomNavItem.Home,
         AdminBottomNavItem.Tasks,
         AdminBottomNavItem.Students,
-        AdminBottomNavItem.Statistics
+        AdminBottomNavItem.Statistics,
+        AdminBottomNavItem.Rating
     )
 
     Scaffold(
@@ -73,7 +76,10 @@ fun AdminMainScreen(
             composable(Screen.AdminHome.route) {
                 AdminHomeScreen(
                     innerPadding = innerPadding,
-                    onLogoutClick = onLogoutClick
+                    onLogoutClick = onLogoutClick,
+                    onRewardsClick = {
+                        navController.navigate(Screen.AdminRewards.route)
+                    }
                 )
             }
 
@@ -111,7 +117,6 @@ fun AdminMainScreen(
 
             composable(Screen.AdminStudentProfile.route) { backStackEntry ->
                 val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
-
                 AdminStudentProfileScreen(
                     studentId = studentId,
                     innerPadding = innerPadding,
@@ -123,6 +128,19 @@ fun AdminMainScreen(
 
             composable(Screen.AdminStatistics.route) {
                 AdminStatisticsScreen(innerPadding = innerPadding)
+            }
+
+            composable(Screen.AdminRating.route) {
+                AdminRatingScreen(innerPadding = innerPadding)
+            }
+
+            composable(Screen.AdminRewards.route) {
+                AdminRewardsScreen(
+                    innerPadding = innerPadding,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }
