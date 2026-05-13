@@ -46,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +62,10 @@ fun AdminHomeScreen(
     innerPadding: PaddingValues,
     onLogoutClick: () -> Unit,
     onRewardsClick: () -> Unit = {},
+    onStudentsClick: () -> Unit = {},
+    onTasksClick: () -> Unit = {},
+    onStatisticsClick: () -> Unit = {},
+    onRatingClick: () -> Unit = {},
     authViewModel: AuthViewModel = viewModel(),
     viewModel: AdminHomeViewModel = viewModel()
 ) {
@@ -106,14 +111,16 @@ fun AdminHomeScreen(
                 title = "Студенты",
                 value = uiState.studentsCount.toString(),
                 icon = Icons.Default.Groups,
-                color = Color(0xFF7B61FF)
+                color = Color(0xFF7B61FF),
+                onClick = onStudentsClick
             )
             AdminMiniStatCard(
                 modifier = Modifier.weight(1f),
                 title = "Задания",
                 value = uiState.tasksCount.toString(),
                 icon = Icons.Default.Assignment,
-                color = Color(0xFF43A047)
+                color = Color(0xFF43A047),
+                onClick = onTasksClick
             )
         }
 
@@ -128,14 +135,16 @@ fun AdminHomeScreen(
                 title = "Средний балл",
                 value = uiState.averagePoints.toString(),
                 icon = Icons.Default.Star,
-                color = Color(0xFFFF8A00)
+                color = Color(0xFFFF8A00),
+                onClick = onStatisticsClick
             )
             AdminMiniStatCard(
                 modifier = Modifier.weight(1f),
                 title = "Лидер",
                 value = uiState.topStudent.take(12),
                 icon = Icons.Default.EmojiEvents,
-                color = Color(0xFFE53935)
+                color = Color(0xFFE53935),
+                onClick = onRatingClick
             )
         }
 
@@ -318,10 +327,11 @@ private fun AdminMiniStatCard(
     title: String,
     value: String,
     icon: ImageVector,
-    color: Color
+    color: Color,
+    onClick: () -> Unit = {}
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

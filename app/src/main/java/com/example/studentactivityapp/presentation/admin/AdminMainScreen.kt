@@ -32,9 +32,7 @@ fun AdminMainScreen(
     val items = listOf(
         AdminBottomNavItem.Home,
         AdminBottomNavItem.Tasks,
-        AdminBottomNavItem.Students,
         AdminBottomNavItem.Submissions,
-        AdminBottomNavItem.Rewards,
         AdminBottomNavItem.Statistics,
         AdminBottomNavItem.Rating
     )
@@ -76,12 +74,18 @@ fun AdminMainScreen(
             startDestination = Screen.AdminHome.route
         ) {
             composable(Screen.AdminHome.route) {
+                fun navTo(route: String) = navController.navigate(route) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true; restoreState = true
+                }
                 AdminHomeScreen(
                     innerPadding = innerPadding,
                     onLogoutClick = onLogoutClick,
-                    onRewardsClick = {
-                        navController.navigate(Screen.AdminRewards.route)
-                    }
+                    onRewardsClick = { navController.navigate(Screen.AdminRewards.route) },
+                    onStudentsClick = { navController.navigate(Screen.AdminStudents.route) },
+                    onTasksClick = { navTo(Screen.AdminTaskManagement.route) },
+                    onStatisticsClick = { navTo(Screen.AdminStatistics.route) },
+                    onRatingClick = { navTo(Screen.AdminRating.route) }
                 )
             }
 
