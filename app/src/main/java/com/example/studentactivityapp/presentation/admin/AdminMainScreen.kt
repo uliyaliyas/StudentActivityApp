@@ -20,6 +20,7 @@ import com.example.studentactivityapp.presentation.admin.rewards.AdminRewardsScr
 import com.example.studentactivityapp.presentation.admin.statistics.AdminStatisticsScreen
 import com.example.studentactivityapp.presentation.admin.studentprofile.AdminStudentProfileScreen
 import com.example.studentactivityapp.presentation.admin.students.AdminStudentsScreen
+import com.example.studentactivityapp.presentation.admin.submissions.AdminSubmissionsScreen
 import com.example.studentactivityapp.presentation.admin.taskmanagement.AdminTaskManagementScreen
 
 @Composable
@@ -32,6 +33,7 @@ fun AdminMainScreen(
         AdminBottomNavItem.Home,
         AdminBottomNavItem.Tasks,
         AdminBottomNavItem.Students,
+        AdminBottomNavItem.Submissions,
         AdminBottomNavItem.Statistics,
         AdminBottomNavItem.Rating
     )
@@ -123,6 +125,10 @@ fun AdminMainScreen(
                         navController.popBackStack()
                     }
                 )
+            }
+
+            composable(Screen.AdminSubmissions.route) {
+                AdminSubmissionsScreen(innerPadding = innerPadding)
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class AdminBottomNavItem(
@@ -41,5 +42,11 @@ sealed class AdminBottomNavItem(
         route = Screen.AdminRating.route,
         title = "Рейтинг",
         icon = Icons.Filled.EmojiEvents
+    )
+
+    data object Submissions : AdminBottomNavItem(
+        route = Screen.AdminSubmissions.route,
+        title = "Заявки",
+        icon = Icons.Filled.AssignmentTurnedIn
     )
 }

@@ -149,7 +149,8 @@ fun StudentTasksScreen(
                     items(uiState.tasks, key = { it.id }) { task ->
                         TaskItem(
                             task = task,
-                            onComplete = { viewModel.completeTask(task) }
+                            isPending = uiState.pendingTaskIds.contains(task.id),
+                            onSubmit = { viewModel.submitTask(task) }
                         )
                     }
                 }
@@ -162,16 +163,30 @@ fun StudentTasksScreen(
 @Composable
 private fun TaskItem(
     task: Task,
-    onComplete: () -> Unit
+    isPending: Boolean = false,
+    onSubmit: () -> Unit
 ) {
     val completed = task.isCompleted
+    val iconBg = when {
+        completed -> Color(0xFFE3F2E8)
+        isPending -> Color(0xFFFFF3E0)
+        else -> Color(0xFFEDE5FF)
+    }
+    val iconTint = when {
+        completed -> Color(0xFF43A047)
+        isPending -> Color(0xFFF57C00)
+        else -> Color(0xFF7B61FF)
+    }
+    val cardBg = when {
+        completed -> Color(0xFFF1EDF6)
+        isPending -> Color(0xFFFFFBF0)
+        else -> Color.White
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (completed) Color(0xFFF1EDF6) else Color.White
-        ),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -179,16 +194,13 @@ private fun TaskItem(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(
-                            color = if (completed) Color(0xFFE3F2E8) else Color(0xFFEDE5FF),
-                            shape = CircleShape
-                        ),
+                        .background(color = iconBg, shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (completed) Icons.Default.CheckCircle else Icons.Default.TaskAlt,
                         contentDescription = null,
-                        tint = if (completed) Color(0xFF43A047) else Color(0xFF7B61FF)
+                        tint = iconTint
                     )
                 }
 
@@ -228,12 +240,24 @@ private fun TaskItem(
 
                 Surface(
                     shape = RoundedCornerShape(14.dp),
-                    color = if (completed) Color(0xFFE6F4EA) else Color(0xFFFFF4E5)
+                    color = when {
+                        completed -> Color(0xFFE6F4EA)
+                        isPending -> Color(0xFFFFF3E0)
+                        else -> Color(0xFFFFF4E5)
+                    }
                 ) {
                     Text(
-                        text = if (completed) "Выполнено" else "Активно",
+                        text = when {
+                            completed -> "Выполнено"
+                            isPending -> "На проверке"
+                            else -> "Активно"
+                        },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        color = if (completed) Color(0xFF43A047) else Color(0xFFE38B00),
+                        color = when {
+                            completed -> Color(0xFF43A047)
+                            isPending -> Color(0xFFF57C00)
+                            else -> Color(0xFFE38B00)
+                        },
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -266,20 +290,28 @@ private fun TaskItem(
             Spacer(modifier = Modifier.height(14.dp))
 
             Button(
-                onClick = onComplete,
-                enabled = !completed,
+                onClick = onSubmit,
+                enabled = !completed && !isPending,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF7B61FF),
-                    disabledContainerColor = Color(0xFFD5CEDF)
+                    disabledContainerColor = when {
+                        isPending -> Color(0xFFFFE0B2)
+                        else -> Color(0xFFD5CEDF)
+                    }
                 )
             ) {
                 Text(
-                    text = if (completed) "Задание выполнено" else "Выполнить задание",
-                    fontWeight = FontWeight.SemiBold
+                    text = when {
+                        completed -> "Задание выполнено"
+                        isPending -> "Ожидает подтверждения"
+                        else -> "Отправить на проверку"
+                    },
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isPending) Color(0xFFF57C00) else Color.White
                 )
             }
         }
