@@ -34,7 +34,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "34.4.0" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.5.0" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 
