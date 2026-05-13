@@ -40,10 +40,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.studentactivityapp.data.model.CompletedTask
 import java.text.SimpleDateFormat
@@ -75,19 +83,11 @@ fun StudentActivityScreen(
     ) {
         TopAppBar(
             title = {
-                Text(
-                    text = "Моя активность",
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2D1B69)
-                )
+                Text("Моя активность", fontWeight = FontWeight.Bold, color = Color(0xFF2D1B69))
             },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Назад",
-                        tint = Color(0xFF7B61FF)
-                    )
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Назад", tint = Color(0xFF7B61FF))
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -136,6 +136,17 @@ fun StudentActivityScreen(
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     item {
+                        val chartBars = uiState.chartBars
+                        if (chartBars.isNotEmpty()) {
+                            ActivityBarChart(
+                                bars = chartBars,
+                                period = uiState.selectedFilter
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+
+                    item {
                         PeriodSummaryCard(
                             count = tasks.size,
                             points = uiState.totalPoints,
@@ -149,13 +160,10 @@ fun StudentActivityScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 40.dp),
+                                    .padding(top = 32.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "Нет заданий за выбранный период",
-                                    color = Color(0xFF7A6F9B)
-                                )
+                                Text("Нет заданий за выбранный период", color = Color(0xFF7A6F9B))
                             }
                         }
                     } else {
@@ -164,6 +172,94 @@ fun StudentActivityScreen(
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActivityBarChart(bars: List<ChartBar>, period: FilterPeriod) {
+    val barColor = Color(0xFF7B61FF)
+    val barColorToday = Color(0xFF5C4EE5)
+    val emptyColor = Color(0xFFEDE5FF)
+    val labelColor = Color(0xFF8A84A0)
+    val valueColor = Color(0xFF7B61FF)
+    val title = when (period) {
+        FilterPeriod.MONTH -> "Баллы по неделям (месяц)"
+        else -> "Баллы по дням (7 дней)"
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF7A6F9B),
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            val maxPoints = bars.maxOfOrNull { it.points }?.coerceAtLeast(1) ?: 1
+
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+            ) {
+                val n = bars.size
+                val gap = 8.dp.toPx()
+                val barW = (size.width - gap * (n + 1)) / n
+                val maxBarH = size.height - 22.dp.toPx()
+
+                bars.forEachIndexed { i, bar ->
+                    val x = gap + i * (barW + gap)
+                    val barH = (bar.points.toFloat() / maxPoints) * maxBarH
+                    val y = size.height - barH - 18.dp.toPx()
+
+                    val color = when {
+                        bar.points == 0 -> emptyColor
+                        bar.isToday -> barColorToday
+                        else -> barColor
+                    }
+
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(x, if (bar.points == 0) size.height - 4.dp.toPx() - 18.dp.toPx() else y),
+                        size = Size(barW, if (bar.points == 0) 4.dp.toPx() else barH),
+                        cornerRadius = CornerRadius(6.dp.toPx())
+                    )
+
+                    if (bar.points > 0) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            "${bar.points}",
+                            x + barW / 2,
+                            (if (bar.points == 0) size.height - 4.dp.toPx() - 18.dp.toPx() else y) - 4.dp.toPx(),
+                            android.graphics.Paint().apply {
+                                textAlign = android.graphics.Paint.Align.CENTER
+                                textSize = 10.sp.toPx()
+                                this.color = valueColor.toArgb()
+                                isFakeBoldText = true
+                            }
+                        )
+                    }
+
+                    drawContext.canvas.nativeCanvas.drawText(
+                        bar.label,
+                        x + barW / 2,
+                        size.height,
+                        android.graphics.Paint().apply {
+                            textAlign = android.graphics.Paint.Align.CENTER
+                            textSize = 10.sp.toPx()
+                            this.color = if (bar.isToday) barColorToday.toArgb() else labelColor.toArgb()
+                            if (bar.isToday) isFakeBoldText = true
+                        }
+                    )
                 }
             }
         }
@@ -188,11 +284,7 @@ private fun PeriodSummaryCard(count: Int, points: Int, period: FilterPeriod) {
                     .background(Color(0xFFEDE5FF), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = null,
-                    tint = Color(0xFF7B61FF)
-                )
+                Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFF7B61FF))
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
@@ -230,12 +322,7 @@ private fun CompletedTaskItem(task: CompletedTask) {
                     .background(Color(0xFFE8F5E9), RoundedCornerShape(13.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF43A047),
-                    modifier = Modifier.size(22.dp)
-                )
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF43A047), modifier = Modifier.size(22.dp))
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
