@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
@@ -48,6 +49,7 @@ fun StudentHomeScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
     onRewardsClick: () -> Unit = {},
     onSnakeClick: () -> Unit = {},
+    onLeaderboardClick: () -> Unit = {},
     viewModel: StudentViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -248,6 +250,54 @@ fun StudentHomeScreen(
                         color = Color(0xFF7A6F9B)
                     )
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Surface(
+            onClick = onLeaderboardClick,
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFFE3F2FD),
+            shadowElevation = 4.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .background(Color(0xFFBBDEFB), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Leaderboard,
+                        contentDescription = null,
+                        tint = Color(0xFF1565C0),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.size(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Рейтинг",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D1B69)
+                    )
+                    Text(
+                        text = "Таблица лидеров",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF7A6F9B)
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = Color(0xFFFFB300),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
