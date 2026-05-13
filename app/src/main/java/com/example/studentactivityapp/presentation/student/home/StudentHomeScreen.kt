@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Card
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 fun StudentHomeScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
     onRewardsClick: () -> Unit = {},
+    onSnakeClick: () -> Unit = {},
     viewModel: StudentViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -182,41 +184,70 @@ fun StudentHomeScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        Surface(
-            onClick = onRewardsClick,
-            shape = RoundedCornerShape(22.dp),
-            color = Color(0xFFEDE5FF),
-            shadowElevation = 4.dp,
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(18.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                onClick = onRewardsClick,
+                shape = RoundedCornerShape(22.dp),
+                color = Color(0xFFEDE5FF),
+                shadowElevation = 4.dp,
+                modifier = Modifier.weight(1f)
             ) {
-                Icon(
-                    imageVector = Icons.Default.CardGiftcard,
-                    contentDescription = null,
-                    tint = Color(0xFF7B61FF),
-                    modifier = Modifier.size(26.dp)
-                )
-                Spacer(modifier = Modifier.size(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CardGiftcard,
+                        contentDescription = null,
+                        tint = Color(0xFF7B61FF),
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
                     Text(
-                        text = "Магазин наград",
+                        text = "Награды",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2D1B69)
                     )
                     Text(
-                        text = "Потрать баллы на приятные бонусы",
+                        text = "Магазин бонусов",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF7A6F9B)
                     )
                 }
-                Text(
-                    text = "→",
-                    color = Color(0xFF7B61FF),
-                    fontWeight = FontWeight.Bold
-                )
+            }
+
+            Surface(
+                onClick = onSnakeClick,
+                shape = RoundedCornerShape(22.dp),
+                color = Color(0xFFE8F5E9),
+                shadowElevation = 4.dp,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SportsEsports,
+                        contentDescription = null,
+                        tint = Color(0xFF43A047),
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = "Змейка",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D1B69)
+                    )
+                    Text(
+                        text = "Зарабатывай баллы",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF7A6F9B)
+                    )
+                }
             }
         }
 

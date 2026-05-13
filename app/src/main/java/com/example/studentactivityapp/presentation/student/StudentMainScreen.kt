@@ -45,7 +45,7 @@ fun StudentMainScreen(
         StudentBottomNavItem.Home,
         StudentBottomNavItem.Tasks,
         StudentBottomNavItem.Rating,
-        StudentBottomNavItem.Snake,
+        StudentBottomNavItem.Rewards,
         StudentBottomNavItem.Profile
     )
 
@@ -91,6 +91,9 @@ fun StudentMainScreen(
                     viewModel = studentViewModel,
                     onRewardsClick = {
                         navController.navigate(Screen.StudentRewards.route)
+                    },
+                    onSnakeClick = {
+                        navController.navigate(Screen.StudentSnake.route)
                     }
                 )
             }

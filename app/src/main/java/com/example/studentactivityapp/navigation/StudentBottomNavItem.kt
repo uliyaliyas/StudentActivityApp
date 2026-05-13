@@ -1,10 +1,10 @@
 package com.example.studentactivityapp.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -31,10 +31,10 @@ sealed class StudentBottomNavItem(
         icon = Icons.Default.Star
     )
 
-    data object Snake : StudentBottomNavItem(
-        route = Screen.StudentSnake.route,
-        title = "Игра",
-        icon = Icons.Default.SportsEsports
+    data object Rewards : StudentBottomNavItem(
+        route = Screen.StudentRewards.route,
+        title = "Награды",
+        icon = Icons.Default.CardGiftcard
     )
 
     data object Profile : StudentBottomNavItem(
