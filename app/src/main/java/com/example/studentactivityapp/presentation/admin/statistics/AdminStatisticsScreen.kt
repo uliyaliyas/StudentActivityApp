@@ -18,24 +18,29 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,10 +55,6 @@ fun AdminStatisticsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadStatistics()
-    }
-
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFF7F3FF), Color(0xFFFFFFFF))
     )
@@ -66,37 +67,21 @@ fun AdminStatisticsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Статистика",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2D1B69)
-                )
-                Text(
-                    text = "Анализ активности студентов",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF7A6F9B)
-                )
-            }
-            IconButton(onClick = { viewModel.loadStatistics() }) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Обновить",
-                    tint = Color(0xFF7B61FF)
-                )
-            }
-        }
+        Text(
+            text = "Статистика",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2D1B69)
+        )
+        Text(
+            text = "Анализ активности студентов",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF7A6F9B)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val currentLoading = uiState.isLoading
-
-        if (currentLoading) {
+        if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxWidth().height(200.dp),
                 contentAlignment = Alignment.Center
@@ -106,7 +91,7 @@ fun AdminStatisticsScreen(
         } else {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
@@ -117,10 +102,47 @@ fun AdminStatisticsScreen(
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
+                    title = "Активные",
+                    value = uiState.activeStudentsCount.toString(),
+                    icon = Icons.Default.Person,
+                    color = Color(0xFF43A047)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
                     title = "Задания",
                     value = uiState.tasksCount.toString(),
                     icon = Icons.Default.Assignment,
                     color = Color(0xFF9C7BFF)
+                )
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Награды",
+                    value = uiState.rewardsCount.toString(),
+                    icon = Icons.Default.CardGiftcard,
+                    color = Color(0xFFE91E8C)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Баллов выдано",
+                    value = uiState.totalPointsDistributed.toString(),
+                    icon = Icons.Default.Star,
+                    color = Color(0xFFFFB300)
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
@@ -132,6 +154,11 @@ fun AdminStatisticsScreen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            if (uiState.pointsBuckets.isNotEmpty() && uiState.studentsCount > 0) {
+                PointsDistributionChart(uiState.pointsBuckets)
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
             val topStudents = uiState.topStudents
             if (topStudents.isNotEmpty()) {
@@ -173,6 +200,82 @@ fun AdminStatisticsScreen(
 }
 
 @Composable
+private fun PointsDistributionChart(buckets: List<PointsBucket>) {
+    val barColor = Color(0xFF7B61FF)
+    val emptyColor = Color(0xFFEDE5FF)
+    val labelColor = Color(0xFF8A84A0)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Распределение студентов по баллам",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF7A6F9B)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            val maxCount = buckets.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            ) {
+                val n = buckets.size
+                val gap = 10.dp.toPx()
+                val barW = (size.width - gap * (n + 1)) / n
+                val maxBarH = size.height - 24.dp.toPx()
+
+                buckets.forEachIndexed { i, bucket ->
+                    val x = gap + i * (barW + gap)
+                    val barH = if (bucket.count > 0) (bucket.count.toFloat() / maxCount) * maxBarH else 4.dp.toPx()
+                    val y = size.height - barH - 18.dp.toPx()
+                    val color = if (bucket.count == 0) emptyColor else barColor
+
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(x, y),
+                        size = Size(barW, barH),
+                        cornerRadius = CornerRadius(6.dp.toPx())
+                    )
+
+                    if (bucket.count > 0) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            "${bucket.count}",
+                            x + barW / 2,
+                            y - 4.dp.toPx(),
+                            android.graphics.Paint().apply {
+                                textAlign = android.graphics.Paint.Align.CENTER
+                                textSize = 11.sp.toPx()
+                                this.color = barColor.toArgb()
+                                isFakeBoldText = true
+                            }
+                        )
+                    }
+
+                    drawContext.canvas.nativeCanvas.drawText(
+                        bucket.label,
+                        x + barW / 2,
+                        size.height,
+                        android.graphics.Paint().apply {
+                            textAlign = android.graphics.Paint.Align.CENTER
+                            textSize = 9.sp.toPx()
+                            this.color = labelColor.toArgb()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun StatMiniCard(
     modifier: Modifier = Modifier,
     title: String,
@@ -193,7 +296,7 @@ private fun StatMiniCard(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Color(0xFFEDE5FF), RoundedCornerShape(12.dp)),
+                    .background(color.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
@@ -221,14 +324,12 @@ private fun StudentBarRow(
     maxPoints: Int,
     place: Int
 ) {
+    val fraction = (student.points.toFloat() / maxPoints).coerceIn(0.05f, 1f)
     val barColor = Brush.horizontalGradient(
         colors = listOf(Color(0xFF7B61FF), Color(0xFFB39DFF))
     )
-    val fraction = (student.points.toFloat() / maxPoints).coerceIn(0.05f, 1f)
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "$place.",
             color = Color(0xFF7B61FF),
@@ -236,7 +337,6 @@ private fun StudentBarRow(
             fontSize = 13.sp,
             modifier = Modifier.width(24.dp)
         )
-
         Text(
             text = if (student.name.isNotEmpty()) student.name else "—",
             modifier = Modifier.width(100.dp),
@@ -245,9 +345,7 @@ private fun StudentBarRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
         Spacer(modifier = Modifier.width(8.dp))
-
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -261,9 +359,7 @@ private fun StudentBarRow(
                     .background(barColor, RoundedCornerShape(10.dp))
             )
         }
-
         Spacer(modifier = Modifier.width(8.dp))
-
         Text(
             text = student.points.toString(),
             color = Color(0xFF7B61FF),
