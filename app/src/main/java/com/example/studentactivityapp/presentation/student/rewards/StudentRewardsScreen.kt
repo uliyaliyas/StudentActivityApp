@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LunchDining
@@ -28,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +54,7 @@ import com.example.studentactivityapp.data.model.Reward
 @Composable
 fun StudentRewardsScreen(
     innerPadding: PaddingValues,
+    onHistoryClick: () -> Unit = {},
     viewModel: StudentRewardsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -80,12 +83,25 @@ fun StudentRewardsScreen(
             .padding(innerPadding)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = "Награды",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF2D1B69)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Награды",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D1B69),
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onHistoryClick) {
+                Icon(
+                    imageVector = Icons.Default.History,
+                    contentDescription = "История",
+                    tint = Color(0xFF7B61FF)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(4.dp))
 

@@ -1,6 +1,8 @@
 package com.example.studentactivityapp.data.repository
 
 import com.example.studentactivityapp.data.FirebaseModule
+import com.example.studentactivityapp.data.model.RedemptionRecord
+import com.example.studentactivityapp.data.model.Reward
 import com.example.studentactivityapp.data.model.User
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
@@ -92,6 +94,50 @@ class UserRepository {
                 0
             }
             Result.success(daily)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun saveRedemption(reward: Reward): Result<Unit> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw Exception("Пользователь не авторизован")
+            val record = hashMapOf(
+                "rewardId" to reward.id,
+                "rewardTitle" to reward.title,
+                "rewardPoints" to reward.points,
+                "timestamp" to System.currentTimeMillis()
+            )
+            firestore.collection("users").document(uid)
+                .collection("redemptions")
+                .add(record)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getRedemptionHistory(): Result<List<RedemptionRecord>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw Exception("Пользователь не авторизован")
+            val snapshot = firestore.collection("users").document(uid)
+                .collection("redemptions")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            val records = snapshot.documents.mapNotNull { doc ->
+                RedemptionRecord(
+                    id = doc.id,
+                    rewardId = doc.getString("rewardId") ?: "",
+                    rewardTitle = doc.getString("rewardTitle") ?: "",
+                    rewardPoints = (doc.getLong("rewardPoints") ?: 0).toInt(),
+                    timestamp = doc.getLong("timestamp") ?: 0L
+                )
+            }
+            Result.success(records)
         } catch (e: Exception) {
             Result.failure(e)
         }

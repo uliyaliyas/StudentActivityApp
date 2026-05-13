@@ -48,6 +48,7 @@ class StudentRewardsViewModel : ViewModel() {
         }
         viewModelScope.launch {
             userRepository.deductPoints(reward.points).onSuccess {
+                userRepository.saveRedemption(reward)
                 _uiState.value = _uiState.value.copy(
                     userPoints = currentPoints - reward.points,
                     successMessage = "Награда «${reward.title}» получена!"

@@ -20,6 +20,7 @@ import com.example.studentactivityapp.presentation.student.achievements.StudentA
 import com.example.studentactivityapp.presentation.student.activity.StudentActivityScreen
 import com.example.studentactivityapp.presentation.student.profile.StudentProfileScreen
 import com.example.studentactivityapp.presentation.student.rating.StudentRatingScreen
+import com.example.studentactivityapp.presentation.student.rewards.StudentRedemptionHistoryScreen
 import com.example.studentactivityapp.presentation.student.rewards.StudentRewardsScreen
 import com.example.studentactivityapp.presentation.student.snake.StudentSnakeScreen
 import com.example.studentactivityapp.presentation.student.tasks.StudentTasksScreen
@@ -141,7 +142,19 @@ fun StudentMainScreen(
             }
 
             composable(Screen.StudentRewards.route) {
-                StudentRewardsScreen(innerPadding = innerPadding)
+                StudentRewardsScreen(
+                    innerPadding = innerPadding,
+                    onHistoryClick = {
+                        navController.navigate(Screen.StudentRedemptionHistory.route)
+                    }
+                )
+            }
+
+            composable(Screen.StudentRedemptionHistory.route) {
+                StudentRedemptionHistoryScreen(
+                    innerPadding = innerPadding,
+                    onBackClick = { navController.popBackStack() }
+                )
             }
         }
     }
