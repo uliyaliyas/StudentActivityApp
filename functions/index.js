@@ -28,3 +28,16 @@ exports.onNewReward = onDocumentCreated("rewards/{rewardId}", async (event) => {
         topic: "students"
     });
 });
+
+exports.onAdminNotification = onDocumentCreated("notifications/{notifId}", async (event) => {
+    const notif = event.data.data();
+    if (!notif || !notif.title || !notif.body) return;
+
+    await admin.messaging().send({
+        notification: {
+            title: notif.title,
+            body: notif.body
+        },
+        topic: "students"
+    });
+});
