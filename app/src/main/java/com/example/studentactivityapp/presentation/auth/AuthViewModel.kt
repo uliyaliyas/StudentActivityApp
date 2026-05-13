@@ -3,6 +3,7 @@ package com.example.studentactivityapp.presentation.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.studentactivityapp.data.repository.AuthRepository
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
@@ -26,6 +27,7 @@ class AuthViewModel : ViewModel() {
             )
 
             result.onSuccess {
+                if (role == "student") subscribeToStudentsTopic()
                 onSuccess()
             }.onFailure {
                 onError(it.message ?: "Ошибка регистрации")
@@ -45,8 +47,14 @@ class AuthViewModel : ViewModel() {
 
             result.onSuccess { user ->
                 when (user.role) {
-                    "admin" -> onAdminSuccess()
-                    "student" -> onStudentSuccess()
+                    "admin" -> {
+                        unsubscribeFromStudentsTopic()
+                        onAdminSuccess()
+                    }
+                    "student" -> {
+                        subscribeToStudentsTopic()
+                        onStudentSuccess()
+                    }
                     else -> onError("Неизвестная роль")
                 }
             }.onFailure {
@@ -56,13 +64,23 @@ class AuthViewModel : ViewModel() {
     }
 
     fun logout() {
+        unsubscribeFromStudentsTopic()
         repository.logout()
     }
 
     fun getCurrentUserId(): String? {
         return repository.getCurrentUserId()
     }
+
     fun isUserLoggedIn(): Boolean {
         return repository.getCurrentUserId() != null
+    }
+
+    private fun subscribeToStudentsTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic("students")
+    }
+
+    private fun unsubscribeFromStudentsTopic() {
+        FirebaseMessaging.getInstance().unsubscribeFromTopic("students")
     }
 }
