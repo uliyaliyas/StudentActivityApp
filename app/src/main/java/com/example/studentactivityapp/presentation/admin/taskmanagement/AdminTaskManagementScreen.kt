@@ -93,6 +93,7 @@ fun AdminTaskManagementScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.openAddForm() },
+                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
                 containerColor = Color(0xFF7B61FF),
                 contentColor = Color.White,
                 shape = RoundedCornerShape(18.dp)
