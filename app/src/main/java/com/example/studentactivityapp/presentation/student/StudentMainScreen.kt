@@ -19,6 +19,7 @@ import com.example.studentactivityapp.navigation.StudentBottomNavItem
 import com.example.studentactivityapp.presentation.student.achievements.StudentAchievementsScreen
 import com.example.studentactivityapp.presentation.student.activity.StudentActivityScreen
 import com.example.studentactivityapp.presentation.student.leaderboard.StudentLeaderboardScreen
+import com.example.studentactivityapp.presentation.student.notifications.StudentNotificationsScreen
 import com.example.studentactivityapp.presentation.student.profile.StudentProfileScreen
 import com.example.studentactivityapp.presentation.student.rating.StudentRatingScreen
 import com.example.studentactivityapp.presentation.student.rewards.StudentRedemptionHistoryScreen
@@ -126,6 +127,9 @@ fun StudentMainScreen(
                     },
                     onAchievementsClick = {
                         navController.navigate(Screen.StudentAchievements.route)
+                    },
+                    onNotificationsClick = {
+                        navController.navigate(Screen.StudentNotifications.route)
                     }
                 )
             }
@@ -166,6 +170,13 @@ fun StudentMainScreen(
 
             composable(Screen.StudentLeaderboard.route) {
                 StudentLeaderboardScreen(
+                    innerPadding = innerPadding,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.StudentNotifications.route) {
+                StudentNotificationsScreen(
                     innerPadding = innerPadding,
                     onBackClick = { navController.popBackStack() }
                 )
