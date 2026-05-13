@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,6 +53,9 @@ import com.example.studentactivityapp.ui.components.appGradient
 @Composable
 fun AdminStatisticsScreen(
     innerPadding: PaddingValues,
+    onStudentsClick: () -> Unit = {},
+    onTasksClick: () -> Unit = {},
+    onRewardsClick: () -> Unit = {},
     viewModel: AdminStatisticsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,14 +101,16 @@ fun AdminStatisticsScreen(
                     title = "Студенты",
                     value = uiState.studentsCount.toString(),
                     icon = Icons.Default.Groups,
-                    color = Color(0xFF7B61FF)
+                    color = Color(0xFF7B61FF),
+                    onClick = onStudentsClick
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
                     title = "Активные",
                     value = uiState.activeStudentsCount.toString(),
                     icon = Icons.Default.Person,
-                    color = Color(0xFF43A047)
+                    color = Color(0xFF43A047),
+                    onClick = onStudentsClick
                 )
             }
 
@@ -119,14 +125,16 @@ fun AdminStatisticsScreen(
                     title = "Задания",
                     value = uiState.tasksCount.toString(),
                     icon = Icons.Default.Assignment,
-                    color = Color(0xFF9C7BFF)
+                    color = Color(0xFF9C7BFF),
+                    onClick = onTasksClick
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
                     title = "Награды",
                     value = uiState.rewardsCount.toString(),
                     icon = Icons.Default.CardGiftcard,
-                    color = Color(0xFFE91E8C)
+                    color = Color(0xFFE91E8C),
+                    onClick = onRewardsClick
                 )
             }
 
@@ -280,10 +288,11 @@ private fun StatMiniCard(
     title: String,
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    color: Color
+    color: Color,
+    onClick: () -> Unit = {}
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

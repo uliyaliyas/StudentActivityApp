@@ -34,6 +34,7 @@ fun AdminMainScreen(
         AdminBottomNavItem.Tasks,
         AdminBottomNavItem.Students,
         AdminBottomNavItem.Submissions,
+        AdminBottomNavItem.Rewards,
         AdminBottomNavItem.Statistics,
         AdminBottomNavItem.Rating
     )
@@ -111,7 +112,27 @@ fun AdminMainScreen(
             }
 
             composable(Screen.AdminStatistics.route) {
-                AdminStatisticsScreen(innerPadding = innerPadding)
+                AdminStatisticsScreen(
+                    innerPadding = innerPadding,
+                    onStudentsClick = {
+                        navController.navigate(Screen.AdminStudents.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true; restoreState = true
+                        }
+                    },
+                    onTasksClick = {
+                        navController.navigate(Screen.AdminTaskManagement.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true; restoreState = true
+                        }
+                    },
+                    onRewardsClick = {
+                        navController.navigate(Screen.AdminRewards.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true; restoreState = true
+                        }
+                    }
+                )
             }
 
             composable(Screen.AdminRating.route) {

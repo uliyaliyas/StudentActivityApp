@@ -3,6 +3,7 @@ package com.example.studentactivityapp.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
@@ -32,6 +33,18 @@ sealed class AdminBottomNavItem(
         icon = Icons.Filled.People
     )
 
+    data object Submissions : AdminBottomNavItem(
+        route = Screen.AdminSubmissions.route,
+        title = "Заявки",
+        icon = Icons.Filled.AssignmentTurnedIn
+    )
+
+    data object Rewards : AdminBottomNavItem(
+        route = Screen.AdminRewards.route,
+        title = "Награды",
+        icon = Icons.Filled.CardGiftcard
+    )
+
     data object Statistics : AdminBottomNavItem(
         route = Screen.AdminStatistics.route,
         title = "Статистика",
@@ -43,10 +56,5 @@ sealed class AdminBottomNavItem(
         title = "Рейтинг",
         icon = Icons.Filled.EmojiEvents
     )
-
-    data object Submissions : AdminBottomNavItem(
-        route = Screen.AdminSubmissions.route,
-        title = "Заявки",
-        icon = Icons.Filled.AssignmentTurnedIn
-    )
 }
+
