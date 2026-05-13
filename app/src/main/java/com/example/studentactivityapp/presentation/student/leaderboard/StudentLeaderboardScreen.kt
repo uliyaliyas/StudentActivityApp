@@ -15,12 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
+import com.example.studentactivityapp.ui.components.InitialsAvatar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,14 +195,7 @@ private fun PodiumItem(entry: LeaderboardEntry) {
         ) {
             Text(text = medalText, fontSize = 22.sp)
             Spacer(modifier = Modifier.width(12.dp))
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(medalColor.copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = medalColor, modifier = Modifier.size(20.dp))
-            }
+            InitialsAvatar(name = entry.user.name, size = 36.dp, fontSize = 14.sp)
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -249,14 +242,7 @@ private fun LeaderboardRow(entry: LeaderboardEntry) {
                 color = Color(0xFF7A6F9B),
                 modifier = Modifier.width(36.dp)
             )
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .background(Color(0xFFEDE5FF), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF7B61FF), modifier = Modifier.size(18.dp))
-            }
+            InitialsAvatar(name = entry.user.name, size = 34.dp, fontSize = 13.sp)
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

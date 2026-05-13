@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -56,6 +55,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.studentactivityapp.ui.components.InitialsAvatar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -136,19 +137,11 @@ fun AdminStudentProfileScreen(
                             modifier = Modifier.padding(20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .background(Color(0xFFEDE5FF), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = Color(0xFF7B61FF),
-                                    modifier = Modifier.size(44.dp)
-                                )
-                            }
+                            InitialsAvatar(
+                                name = student.name,
+                                size = 80.dp,
+                                fontSize = 32.sp
+                            )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = student.name.ifBlank { "Без имени" },
