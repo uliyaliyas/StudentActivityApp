@@ -7,6 +7,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,6 +27,7 @@ import com.example.studentactivityapp.presentation.student.rating.StudentRatingS
 import com.example.studentactivityapp.presentation.student.rewards.StudentRedemptionHistoryScreen
 import com.example.studentactivityapp.presentation.student.rewards.StudentRewardsScreen
 import com.example.studentactivityapp.presentation.student.snake.StudentSnakeScreen
+import com.example.studentactivityapp.data.model.Task
 import com.example.studentactivityapp.presentation.student.tasks.StudentTasksScreen
 import com.example.studentactivityapp.presentation.student.tasks.StudentTasksViewModel
 
@@ -36,12 +39,18 @@ fun StudentMainScreen(
 
     val studentViewModel: StudentViewModel = viewModel()
     val tasksViewModel: StudentTasksViewModel = viewModel()
+    val tasksUiState by tasksViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         tasksViewModel.onTaskCompleted = {
             studentViewModel.loadCurrentUser()
         }
     }
+
+    val now = System.currentTimeMillis()
+    val urgentTasks = tasksUiState.tasks.filter { task ->
+        task.deadline > 0L && (task.deadline - now) / 86_400_000 <= 3
+    }.sortedBy { it.deadline }.take(3)
 
     val items = listOf(
         StudentBottomNavItem.Home,
@@ -91,6 +100,7 @@ fun StudentMainScreen(
                 StudentHomeScreen(
                     innerPadding = innerPadding,
                     viewModel = studentViewModel,
+                    urgentTasks = urgentTasks,
                     onRewardsClick = {
                         navController.navigate(Screen.StudentRewards.route)
                     },
@@ -99,6 +109,9 @@ fun StudentMainScreen(
                     },
                     onLeaderboardClick = {
                         navController.navigate(Screen.StudentLeaderboard.route)
+                    },
+                    onTasksClick = {
+                        navController.navigate(Screen.StudentTasks.route)
                     }
                 )
             }

@@ -22,9 +22,15 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.Warning
+import com.example.studentactivityapp.data.model.Task
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -47,9 +53,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StudentHomeScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    urgentTasks: List<Task> = emptyList(),
     onRewardsClick: () -> Unit = {},
     onSnakeClick: () -> Unit = {},
     onLeaderboardClick: () -> Unit = {},
+    onTasksClick: () -> Unit = {},
     viewModel: StudentViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -301,6 +309,11 @@ fun StudentHomeScreen(
             }
         }
 
+        if (urgentTasks.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(14.dp))
+            UrgentTasksWidget(tasks = urgentTasks, onSeeAllClick = onTasksClick)
+        }
+
         Spacer(modifier = Modifier.height(14.dp))
 
         Card(
@@ -376,6 +389,95 @@ fun StudentHomeScreen(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun UrgentTasksWidget(tasks: List<Task>, onSeeAllClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint = Color(0xFFF57C00),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "Срочные задания",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2D1B69),
+                    modifier = Modifier.weight(1f)
+                )
+                Surface(
+                    onClick = onSeeAllClick,
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xFFFFE0B2)
+                ) {
+                    Text(
+                        text = "Все задания",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFF57C00),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            tasks.forEach { task ->
+                val now = System.currentTimeMillis()
+                val days = ((task.deadline - now) / 86_400_000).toInt()
+                val (chipColor, deadlineText) = when {
+                    days < 0 -> Color(0xFFFFEBEE) to "просрочено"
+                    days == 0 -> Color(0xFFFFEBEE) to "сегодня"
+                    else -> Color(0xFFFFF3E0) to "осталось $days дн."
+                }
+                val textColor = if (days <= 0) Color(0xFFE53935) else Color(0xFFF57C00)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (days < 0) Icons.Default.Warning else Icons.Default.TaskAlt,
+                        contentDescription = null,
+                        tint = textColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = task.title,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF2D1B69),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Surface(shape = RoundedCornerShape(8.dp), color = chipColor) {
+                        Text(
+                            text = deadlineText,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = textColor,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
