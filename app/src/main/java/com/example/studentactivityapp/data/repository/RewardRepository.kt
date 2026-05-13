@@ -46,6 +46,17 @@ class RewardRepository {
         }
     }
 
+    suspend fun updateReward(rewardId: String, title: String, description: String, points: Int, iconName: String): Result<Unit> {
+        return try {
+            firestore.collection("rewards").document(rewardId).update(
+                mapOf("title" to title, "description" to description, "points" to points, "iconName" to iconName)
+            ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun deleteReward(rewardId: String): Result<Unit> {
         return try {
             firestore.collection("rewards").document(rewardId).delete().await()

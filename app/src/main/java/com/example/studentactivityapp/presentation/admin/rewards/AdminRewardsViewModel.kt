@@ -9,16 +9,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class RewardFormState(
+    val rewardId: String? = null,
+    val title: String = "",
+    val description: String = "",
+    val pointsText: String = "",
+    val iconName: String = "gift",
+    val isSaving: Boolean = false,
+    val error: String? = null
+) {
+    val isEdit get() = rewardId != null
+    val isValid get() = title.isNotBlank() && (pointsText.toIntOrNull() ?: 0) > 0
+}
+
 data class AdminRewardsUiState(
     val isLoading: Boolean = false,
     val rewards: List<Reward> = emptyList(),
-    val error: String? = null,
-    val successMessage: String? = null
+    val showForm: Boolean = false,
+    val form: RewardFormState = RewardFormState(),
+    val error: String? = null
 )
 
 class AdminRewardsViewModel : ViewModel() {
 
     private val repository = RewardRepository()
+    private var allRewards: List<Reward> = emptyList()
 
     private val _uiState = MutableStateFlow(AdminRewardsUiState())
     val uiState: StateFlow<AdminRewardsUiState> = _uiState.asStateFlow()
@@ -26,37 +41,87 @@ class AdminRewardsViewModel : ViewModel() {
     fun loadRewards() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            repository.getAllRewards().onSuccess { rewards ->
-                _uiState.value = AdminRewardsUiState(rewards = rewards)
-            }.onFailure { error ->
-                _uiState.value = AdminRewardsUiState(error = error.message ?: "Ошибка загрузки")
-            }
+            repository.getAllRewards()
+                .onSuccess { rewards ->
+                    allRewards = rewards
+                    _uiState.value = _uiState.value.copy(isLoading = false, rewards = rewards)
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message ?: "Ошибка загрузки")
+                }
         }
     }
 
-    fun addReward(title: String, description: String, points: Int) {
-        if (title.isBlank() || points <= 0) return
+    fun openAddForm() {
+        _uiState.value = _uiState.value.copy(showForm = true, form = RewardFormState())
+    }
+
+    fun openEditForm(reward: Reward) {
+        _uiState.value = _uiState.value.copy(
+            showForm = true,
+            form = RewardFormState(
+                rewardId = reward.id,
+                title = reward.title,
+                description = reward.description,
+                pointsText = reward.points.toString(),
+                iconName = reward.iconName
+            )
+        )
+    }
+
+    fun closeForm() {
+        _uiState.value = _uiState.value.copy(showForm = false, form = RewardFormState())
+    }
+
+    fun updateTitle(value: String) {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(title = value, error = null))
+    }
+
+    fun updateDescription(value: String) {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(description = value, error = null))
+    }
+
+    fun updatePoints(value: String) {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(pointsText = value, error = null))
+    }
+
+    fun updateIcon(iconName: String) {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(iconName = iconName))
+    }
+
+    fun saveReward() {
+        val form = _uiState.value.form
+        val points = form.pointsText.toIntOrNull() ?: return
+        _uiState.value = _uiState.value.copy(form = form.copy(isSaving = true, error = null))
+
         viewModelScope.launch {
-            repository.createReward(title, description, points).onSuccess {
-                _uiState.value = _uiState.value.copy(successMessage = "Награда добавлена")
+            val result = if (form.isEdit) {
+                repository.updateReward(form.rewardId!!, form.title.trim(), form.description.trim(), points, form.iconName)
+            } else {
+                repository.createReward(form.title.trim(), form.description.trim(), points, form.iconName)
+            }
+
+            result.onSuccess {
+                closeForm()
                 loadRewards()
             }.onFailure { error ->
-                _uiState.value = _uiState.value.copy(error = error.message ?: "Ошибка")
+                _uiState.value = _uiState.value.copy(
+                    form = _uiState.value.form.copy(isSaving = false, error = error.message ?: "Ошибка сохранения")
+                )
             }
         }
     }
 
     fun deleteReward(rewardId: String) {
+        val snapshot = allRewards.toList()
+        allRewards = allRewards.filter { it.id != rewardId }
+        _uiState.value = _uiState.value.copy(rewards = allRewards)
+
         viewModelScope.launch {
-            repository.deleteReward(rewardId).onSuccess {
-                loadRewards()
-            }.onFailure { error ->
-                _uiState.value = _uiState.value.copy(error = error.message ?: "Ошибка удаления")
+            repository.deleteReward(rewardId).onFailure {
+                allRewards = snapshot
+                _uiState.value = _uiState.value.copy(rewards = allRewards, error = it.message ?: "Ошибка удаления")
             }
         }
-    }
-
-    fun clearMessage() {
-        _uiState.value = _uiState.value.copy(successMessage = null, error = null)
     }
 }
