@@ -14,7 +14,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.studentactivityapp.navigation.AdminBottomNavItem
 import com.example.studentactivityapp.navigation.Screen
-import com.example.studentactivityapp.presentation.admin.addtask.AdminAddTaskScreen
 import com.example.studentactivityapp.presentation.admin.home.AdminHomeScreen
 import com.example.studentactivityapp.presentation.admin.rating.AdminRatingScreen
 import com.example.studentactivityapp.presentation.admin.rewards.AdminRewardsScreen
@@ -84,24 +83,7 @@ fun AdminMainScreen(
             }
 
             composable(Screen.AdminTaskManagement.route) {
-                AdminTaskManagementScreen(
-                    innerPadding = innerPadding,
-                    onAddTaskClick = {
-                        navController.navigate(Screen.AdminAddTask.route)
-                    }
-                )
-            }
-
-            composable(Screen.AdminAddTask.route) {
-                AdminAddTaskScreen(
-                    innerPadding = innerPadding,
-                    onTaskSaved = {
-                        navController.popBackStack()
-                    },
-                    onBackClick = {
-                        navController.popBackStack()
-                    }
-                )
+                AdminTaskManagementScreen(innerPadding = innerPadding)
             }
 
             composable(Screen.AdminStudents.route) {

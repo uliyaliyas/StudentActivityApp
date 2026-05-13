@@ -116,6 +116,17 @@ class TaskRepository {
         }
     }
 
+    suspend fun updateTask(taskId: String, title: String, description: String, points: Int): Result<Unit> {
+        return try {
+            firestore.collection("tasks").document(taskId).update(
+                mapOf("title" to title, "description" to description, "points" to points)
+            ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun deleteTask(taskId: String): Result<Unit> {
         return try {
             firestore.collection("tasks").document(taskId).delete().await()
