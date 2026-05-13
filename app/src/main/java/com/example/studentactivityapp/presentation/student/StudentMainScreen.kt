@@ -44,7 +44,7 @@ fun StudentMainScreen(
     val items = listOf(
         StudentBottomNavItem.Home,
         StudentBottomNavItem.Tasks,
-        StudentBottomNavItem.Rating,
+        StudentBottomNavItem.Snake,
         StudentBottomNavItem.Rewards,
         StudentBottomNavItem.Profile
     )
