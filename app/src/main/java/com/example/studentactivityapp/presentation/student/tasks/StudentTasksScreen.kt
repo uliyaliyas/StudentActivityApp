@@ -18,13 +18,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,10 +61,7 @@ fun StudentTasksScreen(
     }
 
     val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF7F3FF),
-            Color.White
-        )
+        colors = listOf(Color(0xFFF7F3FF), Color.White)
     )
 
     Column(
@@ -75,49 +78,76 @@ fun StudentTasksScreen(
             color = Color(0xFF2D1B69)
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Выполняй задания и получай баллы",
+            text = if (uiState.searchQuery.isBlank()) "Доступно: ${uiState.totalCount}"
+                   else "Найдено: ${uiState.tasks.size}",
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF7A6F9B)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Surface(
-            shape = RoundedCornerShape(18.dp),
-            color = Color(0xFFF1EBFF)
-        ) {
-            Text(
-                text = "Активные и выполненные задания",
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                color = Color(0xFF7B61FF),
-                fontWeight = FontWeight.SemiBold
+        OutlinedTextField(
+            value = uiState.searchQuery,
+            onValueChange = { viewModel.search(it) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Поиск по названию", color = Color(0xFFAAAAAA)) },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF7B61FF))
+            },
+            trailingIcon = {
+                if (uiState.searchQuery.isNotBlank()) {
+                    IconButton(onClick = { viewModel.search("") }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Очистить", tint = Color(0xFF7A6F9B))
+                    }
+                }
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF7B61FF),
+                unfocusedBorderColor = Color(0xFFD8D0F0),
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
             )
-        }
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (uiState.isLoading) {
-            Text(text = "Загрузка...", color = Color.Gray)
-        }
+        Spacer(modifier = Modifier.height(14.dp))
 
         uiState.error?.let {
             Text(text = it, color = Color.Red)
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(uiState.tasks) { task ->
-                TaskItem(
-                    task = task,
-                    onComplete = {
-                        viewModel.completeTask(task)
+        when {
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFF7B61FF))
+                }
+            }
+            uiState.tasks.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = if (uiState.searchQuery.isBlank()) "Нет доступных заданий"
+                               else "Ничего не найдено",
+                        color = Color(0xFF7A6F9B)
+                    )
+                }
+            }
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(uiState.tasks, key = { it.id }) { task ->
+                        TaskItem(
+                            task = task,
+                            onComplete = { viewModel.completeTask(task) }
+                        )
                     }
-                )
+                }
             }
         }
     }
@@ -138,12 +168,8 @@ private fun TaskItem(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -169,9 +195,7 @@ private fun TaskItem(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2D1B69)
                     )
-
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Text(
                         text = task.description,
                         style = MaterialTheme.typography.bodyMedium,
@@ -184,13 +208,10 @@ private fun TaskItem(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFFF1EBFF)
-                ) {
+                Surface(shape = RoundedCornerShape(14.dp), color = Color(0xFFF1EBFF)) {
                     Text(
                         text = "+${task.points} баллов",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -210,26 +231,29 @@ private fun TaskItem(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-            }
 
-            if (task.deadline > 0L) {
-                Spacer(modifier = Modifier.height(8.dp))
-                val now = System.currentTimeMillis()
-                val days = ((task.deadline - now) / 86_400_000).toInt()
-                val (chipColor, chipText, textColor) = when {
-                    days < 0 -> Triple(Color(0xFFFFEBEE), "просрочено", Color(0xFFE53935))
-                    days == 0 -> Triple(Color(0xFFFFEBEE), "дедлайн сегодня", Color(0xFFE53935))
-                    days <= 3 -> Triple(Color(0xFFFFF3E0), "осталось $days дн.", Color(0xFFF57C00))
-                    else -> Triple(Color(0xFFE8F5E9), "до ${SimpleDateFormat("d MMM", Locale("ru")).format(Date(task.deadline))}", Color(0xFF388E3C))
-                }
-                Surface(shape = RoundedCornerShape(12.dp), color = chipColor) {
-                    Text(
-                        text = chipText,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = textColor,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                if (task.deadline > 0L) {
+                    val now = System.currentTimeMillis()
+                    val days = ((task.deadline - now) / 86_400_000).toInt()
+                    val (chipColor, chipText, textColor) = when {
+                        days < 0 -> Triple(Color(0xFFFFEBEE), "просрочено", Color(0xFFE53935))
+                        days == 0 -> Triple(Color(0xFFFFEBEE), "сегодня", Color(0xFFE53935))
+                        days <= 3 -> Triple(Color(0xFFFFF3E0), "осталось $days дн.", Color(0xFFF57C00))
+                        else -> Triple(
+                            Color(0xFFE8F5E9),
+                            "до ${SimpleDateFormat("d MMM", Locale("ru")).format(Date(task.deadline))}",
+                            Color(0xFF388E3C)
+                        )
+                    }
+                    Surface(shape = RoundedCornerShape(14.dp), color = chipColor) {
+                        Text(
+                            text = chipText,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            color = textColor,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
 

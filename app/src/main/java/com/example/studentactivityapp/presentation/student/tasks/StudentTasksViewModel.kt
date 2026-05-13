@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 data class TasksUiState(
     val isLoading: Boolean = false,
     val tasks: List<Task> = emptyList(),
+    val searchQuery: String = "",
+    val totalCount: Int = 0,
     val error: String? = null
 )
 
@@ -29,7 +31,7 @@ class StudentTasksViewModel : ViewModel() {
 
     private var tasksListener: ListenerRegistration? = null
     private var completedListener: ListenerRegistration? = null
-    private var allTasks: List<Task> = emptyList()
+    private var activeTasks: List<Task> = emptyList()
     private var completedIds: Set<String> = emptySet()
 
     init {
@@ -46,7 +48,7 @@ class StudentTasksViewModel : ViewModel() {
                     _uiState.value = TasksUiState(error = error.message)
                     return@addSnapshotListener
                 }
-                allTasks = snapshot?.documents?.map { doc ->
+                val all = snapshot?.documents?.map { doc ->
                     Task(
                         id = doc.id,
                         title = doc.getString("title") ?: "",
@@ -55,7 +57,8 @@ class StudentTasksViewModel : ViewModel() {
                         deadline = doc.getLong("deadline") ?: 0L
                     )
                 } ?: emptyList()
-                updateTaskList()
+                activeTasks = all.filter { !completedIds.contains(it.id) }
+                applySearch(_uiState.value.searchQuery)
             }
 
         completedListener = firestore.collection("users").document(uid)
@@ -63,15 +66,23 @@ class StudentTasksViewModel : ViewModel() {
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
                 completedIds = snapshot?.documents?.map { it.id }?.toSet() ?: emptySet()
-                updateTaskList()
+                activeTasks = activeTasks.filter { !completedIds.contains(it.id) }
+                applySearch(_uiState.value.searchQuery)
             }
     }
 
-    private fun updateTaskList() {
-        val tasks = allTasks
-            .map { it.copy(isCompleted = completedIds.contains(it.id)) }
-            .filter { !it.isCompleted }
-        _uiState.value = TasksUiState(tasks = tasks)
+    private fun applySearch(query: String) {
+        val filtered = if (query.isBlank()) activeTasks
+        else activeTasks.filter { it.title.lowercase().contains(query.trim().lowercase()) }
+        _uiState.value = TasksUiState(
+            tasks = filtered,
+            searchQuery = query,
+            totalCount = activeTasks.size
+        )
+    }
+
+    fun search(query: String) {
+        applySearch(query)
     }
 
     fun loadTasks() { /* snapshot listener handles updates automatically */ }
