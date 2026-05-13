@@ -34,11 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun StudentSnakeScreen(
@@ -47,9 +47,7 @@ fun StudentSnakeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF1A1035), Color(0xFF0D0820))
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

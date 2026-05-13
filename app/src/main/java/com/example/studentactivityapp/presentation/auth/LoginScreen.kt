@@ -25,13 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.studentactivityapp.R
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun LoginScreen(
@@ -44,12 +44,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF7F0FF),
-            Color.White
-        )
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

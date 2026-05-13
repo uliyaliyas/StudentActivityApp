@@ -32,10 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.studentactivityapp.ui.components.appGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +50,7 @@ fun AdminAddTaskScreen(
     var pointsText by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF7F3FF),
-            Color.White
-        )
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

@@ -43,13 +43,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.studentactivityapp.data.model.Reward
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun StudentRewardsScreen(
@@ -72,9 +72,7 @@ fun StudentRewardsScreen(
         }
     }
 
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color(0xFFFFFFFF))
-    )
+    val backgroundGradient = appGradient
 
     Column(
         modifier = Modifier

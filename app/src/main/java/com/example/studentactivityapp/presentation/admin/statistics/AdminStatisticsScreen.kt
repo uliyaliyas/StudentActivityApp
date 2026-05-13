@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.studentactivityapp.data.model.User
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun AdminStatisticsScreen(
@@ -55,9 +56,7 @@ fun AdminStatisticsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color(0xFFFFFFFF))
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

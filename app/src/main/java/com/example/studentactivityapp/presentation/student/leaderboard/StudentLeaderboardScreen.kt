@@ -36,13 +36,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.studentactivityapp.ui.components.appGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,9 +53,7 @@ fun StudentLeaderboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color.White)
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

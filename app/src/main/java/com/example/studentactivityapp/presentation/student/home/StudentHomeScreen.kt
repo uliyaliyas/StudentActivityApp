@@ -45,10 +45,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun StudentHomeScreen(
@@ -72,12 +72,7 @@ fun StudentHomeScreen(
     val nextLevel = getNextLevelPoints(points)
     val progress = getProgress(points)
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF5F1FF),
-            Color.White
-        )
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

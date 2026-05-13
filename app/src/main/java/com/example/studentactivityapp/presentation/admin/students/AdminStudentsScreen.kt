@@ -35,7 +35,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.studentactivityapp.data.model.User
 import com.example.studentactivityapp.ui.components.InitialsAvatar
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun AdminStudentsScreen(
@@ -56,9 +56,7 @@ fun AdminStudentsScreen(
         viewModel.loadStudents()
     }
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color.White)
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

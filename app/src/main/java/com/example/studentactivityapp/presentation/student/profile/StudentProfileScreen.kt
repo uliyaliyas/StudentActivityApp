@@ -46,13 +46,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.studentactivityapp.presentation.auth.AuthViewModel
 import com.example.studentactivityapp.presentation.student.StudentViewModel
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun StudentProfileScreen(
@@ -85,9 +85,7 @@ fun StudentProfileScreen(
     val points = user?.points ?: 0
     val level = getStudentLevel(points)
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color.White)
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

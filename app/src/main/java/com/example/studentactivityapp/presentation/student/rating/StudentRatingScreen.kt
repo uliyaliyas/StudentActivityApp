@@ -32,11 +32,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.studentactivityapp.data.model.User
+import com.example.studentactivityapp.ui.components.appGradient
 
 @Composable
 fun StudentRatingScreen(
@@ -49,12 +49,7 @@ fun StudentRatingScreen(
         viewModel.loadRating()
     }
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF7F3FF),
-            Color.White
-        )
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier

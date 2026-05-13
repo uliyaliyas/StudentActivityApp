@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
@@ -57,6 +56,7 @@ import com.example.studentactivityapp.data.model.CompletedTask
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.studentactivityapp.ui.components.appGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,9 +71,7 @@ fun StudentActivityScreen(
         viewModel.loadCompletedTasks()
     }
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F3FF), Color.White)
-    )
+    val gradient = appGradient
 
     Column(
         modifier = Modifier
