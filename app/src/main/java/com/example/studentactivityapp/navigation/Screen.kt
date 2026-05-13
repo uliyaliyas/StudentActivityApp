@@ -17,6 +17,7 @@ sealed class Screen(val route: String) {
     data object StudentRedemptionHistory : Screen("student_redemption_history")
     data object StudentLeaderboard : Screen("student_leaderboard")
     data object StudentNotifications : Screen("student_notifications")
+    data object StudentPointsHistory : Screen("student_points_history")
 
     data object AdminHome : Screen("admin_home")
     data object AdminTaskManagement : Screen("admin_task_management")

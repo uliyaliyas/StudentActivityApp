@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Star
 import com.example.studentactivityapp.ui.components.InitialsAvatar
 import androidx.compose.material3.AlertDialog
@@ -59,6 +60,7 @@ fun StudentProfileScreen(
     onLogoutClick: () -> Unit,
     onActivityClick: () -> Unit,
     onAchievementsClick: () -> Unit,
+    onPointsHistoryClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     viewModel: StudentViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel()
@@ -207,6 +209,19 @@ fun StudentProfileScreen(
             Icon(imageVector = Icons.Default.EmojiEvents, contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))
             Text("Мои достижения")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = onPointsHistoryClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047))
+        ) {
+            Icon(imageVector = Icons.Default.TrendingUp, contentDescription = null)
+            Spacer(modifier = Modifier.size(8.dp))
+            Text("История баллов")
         }
 
         Spacer(modifier = Modifier.height(10.dp))
