@@ -246,6 +246,7 @@ fun AdminTaskManagementScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskFormContent(
     form: TaskFormState,
