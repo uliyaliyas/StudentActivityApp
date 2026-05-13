@@ -13,16 +13,15 @@ class TaskRepository {
     suspend fun getAllTasks(): Result<List<Task>> {
         return try {
             val snapshot = firestore.collection("tasks").get().await()
-
             val tasks = snapshot.documents.map { doc ->
                 Task(
                     id = doc.id,
                     title = doc.getString("title") ?: "",
                     description = doc.getString("description") ?: "",
-                    points = (doc.getLong("points") ?: 0).toInt()
+                    points = (doc.getLong("points") ?: 0).toInt(),
+                    deadline = doc.getLong("deadline") ?: 0L
                 )
             }
-
             Result.success(tasks)
         } catch (e: Exception) {
             Result.failure(e)
@@ -32,19 +31,17 @@ class TaskRepository {
     suspend fun createTask(
         title: String,
         description: String,
-        points: Int
+        points: Int,
+        deadline: Long = 0L
     ): Result<Unit> {
         return try {
             val task = hashMapOf(
                 "title" to title,
                 "description" to description,
-                "points" to points
+                "points" to points,
+                "deadline" to deadline
             )
-
-            firestore.collection("tasks")
-                .add(task)
-                .await()
-
+            firestore.collection("tasks").add(task).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -70,7 +67,8 @@ class TaskRepository {
                     title = doc.getString("title") ?: "",
                     description = doc.getString("description") ?: "",
                     points = (doc.getLong("points") ?: 0).toInt(),
-                    isCompleted = completedTaskIds.contains(doc.id)
+                    isCompleted = completedTaskIds.contains(doc.id),
+                    deadline = doc.getLong("deadline") ?: 0L
                 )
             }.filter { !it.isCompleted }
 
@@ -116,10 +114,10 @@ class TaskRepository {
         }
     }
 
-    suspend fun updateTask(taskId: String, title: String, description: String, points: Int): Result<Unit> {
+    suspend fun updateTask(taskId: String, title: String, description: String, points: Int, deadline: Long = 0L): Result<Unit> {
         return try {
             firestore.collection("tasks").document(taskId).update(
-                mapOf("title" to title, "description" to description, "points" to points)
+                mapOf("title" to title, "description" to description, "points" to points, "deadline" to deadline)
             ).await()
             Result.success(Unit)
         } catch (e: Exception) {

@@ -14,6 +14,7 @@ data class TaskFormState(
     val title: String = "",
     val description: String = "",
     val pointsText: String = "",
+    val deadline: Long = 0L,
     val isSaving: Boolean = false,
     val error: String? = null
 ) {
@@ -77,9 +78,18 @@ class AdminTaskManagementViewModel : ViewModel() {
                 taskId = task.id,
                 title = task.title,
                 description = task.description,
-                pointsText = task.points.toString()
+                pointsText = task.points.toString(),
+                deadline = task.deadline
             )
         )
+    }
+
+    fun updateDeadline(value: Long) {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(deadline = value))
+    }
+
+    fun clearDeadline() {
+        _uiState.value = _uiState.value.copy(form = _uiState.value.form.copy(deadline = 0L))
     }
 
     fun closeForm() {
@@ -105,9 +115,9 @@ class AdminTaskManagementViewModel : ViewModel() {
 
         viewModelScope.launch {
             val result = if (form.isEdit) {
-                repository.updateTask(form.taskId!!, form.title.trim(), form.description.trim(), points)
+                repository.updateTask(form.taskId!!, form.title.trim(), form.description.trim(), points, form.deadline)
             } else {
-                repository.createTask(form.title.trim(), form.description.trim(), points)
+                repository.createTask(form.title.trim(), form.description.trim(), points, form.deadline)
             }
 
             result.onSuccess {

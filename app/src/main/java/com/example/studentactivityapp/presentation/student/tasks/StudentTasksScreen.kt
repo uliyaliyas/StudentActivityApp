@@ -39,6 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.studentactivityapp.data.model.Task
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun StudentTasksScreen(
@@ -205,6 +208,27 @@ private fun TaskItem(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         color = if (completed) Color(0xFF43A047) else Color(0xFFE38B00),
                         fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            if (task.deadline > 0L) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val now = System.currentTimeMillis()
+                val days = ((task.deadline - now) / 86_400_000).toInt()
+                val (chipColor, chipText, textColor) = when {
+                    days < 0 -> Triple(Color(0xFFFFEBEE), "просрочено", Color(0xFFE53935))
+                    days == 0 -> Triple(Color(0xFFFFEBEE), "дедлайн сегодня", Color(0xFFE53935))
+                    days <= 3 -> Triple(Color(0xFFFFF3E0), "осталось $days дн.", Color(0xFFF57C00))
+                    else -> Triple(Color(0xFFE8F5E9), "до ${SimpleDateFormat("d MMM", Locale("ru")).format(Date(task.deadline))}", Color(0xFF388E3C))
+                }
+                Surface(shape = RoundedCornerShape(12.dp), color = chipColor) {
+                    Text(
+                        text = chipText,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        color = textColor,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
