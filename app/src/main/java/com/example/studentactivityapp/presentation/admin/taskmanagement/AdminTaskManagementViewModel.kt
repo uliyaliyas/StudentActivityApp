@@ -26,6 +26,7 @@ data class TaskFormState(
 
 data class AdminTasksUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val tasks: List<Task> = emptyList(),
     val searchQuery: String = "",
     val showForm: Boolean = false,
@@ -47,12 +48,22 @@ class AdminTaskManagementViewModel : ViewModel() {
         startListening()
     }
 
+    fun refresh() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        tasksListener?.remove()
+        attachListener()
+    }
+
     private fun startListening() {
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        attachListener()
+    }
+
+    private fun attachListener() {
         tasksListener = firestore.collection("tasks")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 allTasks = snapshot?.documents?.map { doc ->
@@ -79,6 +90,7 @@ class AdminTaskManagementViewModel : ViewModel() {
         else allTasks.filter { it.title.lowercase().contains(query.trim().lowercase()) }
         _uiState.value = _uiState.value.copy(
             isLoading = false,
+            isRefreshing = false,
             tasks = filtered,
             searchQuery = query
         )

@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class TasksUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val tasks: List<Task> = emptyList(),
     val searchQuery: String = "",
     val totalCount: Int = 0,
@@ -38,14 +39,26 @@ class StudentTasksViewModel : ViewModel() {
         startListening()
     }
 
+    fun refresh() {
+        val query = _uiState.value.searchQuery
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        tasksListener?.remove()
+        completedListener?.remove()
+        attachListeners(query)
+    }
+
     private fun startListening() {
-        val uid = auth.currentUser?.uid ?: return
         _uiState.value = TasksUiState(isLoading = true)
+        attachListeners("")
+    }
+
+    private fun attachListeners(query: String) {
+        val uid = auth.currentUser?.uid ?: return
 
         tasksListener = firestore.collection("tasks")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = TasksUiState(error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 val all = snapshot?.documents?.map { doc ->
@@ -77,7 +90,8 @@ class StudentTasksViewModel : ViewModel() {
         _uiState.value = TasksUiState(
             tasks = filtered,
             searchQuery = query,
-            totalCount = activeTasks.size
+            totalCount = activeTasks.size,
+            isRefreshing = false
         )
     }
 

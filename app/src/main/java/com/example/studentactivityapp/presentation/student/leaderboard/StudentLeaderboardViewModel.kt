@@ -16,6 +16,7 @@ data class LeaderboardEntry(
 
 data class LeaderboardUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val entries: List<LeaderboardEntry> = emptyList(),
     val currentUserRank: Int? = null,
     val error: String? = null
@@ -34,14 +35,23 @@ class StudentLeaderboardViewModel : ViewModel() {
         startListening()
     }
 
+    fun refresh() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        listener?.remove()
+        attachListener()
+    }
+
     private fun startListening() {
         _uiState.value = LeaderboardUiState(isLoading = true)
-        val currentUid = auth.currentUser?.uid
+        attachListener()
+    }
 
+    private fun attachListener() {
+        val currentUid = auth.currentUser?.uid
         listener = firestore.collection("users")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = LeaderboardUiState(error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 val students = snapshot?.documents?.mapNotNull { doc ->

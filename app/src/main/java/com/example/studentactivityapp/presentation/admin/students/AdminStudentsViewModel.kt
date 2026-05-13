@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 data class AdminStudentsUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val students: List<User> = emptyList(),
     val searchQuery: String = "",
     val totalCount: Int = 0,
@@ -29,12 +30,22 @@ class AdminStudentsViewModel : ViewModel() {
         startListening()
     }
 
+    fun refresh() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        studentsListener?.remove()
+        attachListener()
+    }
+
     private fun startListening() {
         _uiState.value = AdminStudentsUiState(isLoading = true)
+        attachListener()
+    }
+
+    private fun attachListener() {
         studentsListener = firestore.collection("users")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = AdminStudentsUiState(error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 allStudents = snapshot?.documents?.mapNotNull { doc ->
@@ -69,6 +80,7 @@ class AdminStudentsViewModel : ViewModel() {
         }
         _uiState.value = _uiState.value.copy(
             isLoading = false,
+            isRefreshing = false,
             students = filtered,
             searchQuery = query,
             totalCount = allStudents.size

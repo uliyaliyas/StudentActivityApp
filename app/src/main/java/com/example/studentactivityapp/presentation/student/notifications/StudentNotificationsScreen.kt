@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,6 +75,11 @@ fun StudentNotificationsScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
         )
 
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize()
+        ) {
         when {
             uiState.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -109,6 +115,7 @@ fun StudentNotificationsScreen(
                     }
                 }
             }
+        }
         }
     }
 }

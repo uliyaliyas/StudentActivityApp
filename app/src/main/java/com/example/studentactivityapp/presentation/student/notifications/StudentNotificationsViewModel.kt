@@ -17,6 +17,7 @@ data class NotificationItem(
 
 data class NotificationsUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val notifications: List<NotificationItem> = emptyList(),
     val error: String? = null
 )
@@ -33,13 +34,23 @@ class StudentNotificationsViewModel : ViewModel() {
         startListening()
     }
 
+    fun refresh() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        listener?.remove()
+        attachListener()
+    }
+
     private fun startListening() {
         _uiState.value = NotificationsUiState(isLoading = true)
+        attachListener()
+    }
+
+    private fun attachListener() {
         listener = firestore.collection("notifications")
             .orderBy("sentAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = NotificationsUiState(error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 val items = snapshot?.documents?.map { doc ->

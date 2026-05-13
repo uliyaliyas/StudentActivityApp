@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.example.studentactivityapp.ui.components.appGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +93,11 @@ fun StudentAchievementsScreen(
         val error = uiState.error
         val achievements = uiState.achievements
 
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize()
+        ) {
         when {
             isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -130,6 +136,7 @@ fun StudentAchievementsScreen(
                     }
                 }
             }
+        }
         }
     }
 }

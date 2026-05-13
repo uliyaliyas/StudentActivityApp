@@ -68,6 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.example.studentactivityapp.data.model.Task
 import com.example.studentactivityapp.ui.components.appGradient
 
@@ -164,6 +165,11 @@ fun AdminTaskManagementScreen(
             val isLoading = uiState.isLoading
             val tasks = uiState.tasks
 
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { viewModel.refresh() },
+                modifier = Modifier.fillMaxSize()
+            ) {
             when {
                 isLoading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -192,6 +198,7 @@ fun AdminTaskManagementScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

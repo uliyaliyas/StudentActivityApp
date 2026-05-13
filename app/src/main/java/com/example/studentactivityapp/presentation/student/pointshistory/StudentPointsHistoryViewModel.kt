@@ -19,6 +19,7 @@ data class PointHistoryItem(
 
 data class PointsHistoryUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val items: List<PointHistoryItem> = emptyList(),
     val totalEarned: Int = 0,
     val totalSpent: Int = 0,
@@ -40,13 +41,24 @@ class StudentPointsHistoryViewModel : ViewModel() {
     val uiState: StateFlow<PointsHistoryUiState> = _uiState.asStateFlow()
 
     init {
+        attachListeners()
+    }
+
+    fun refresh() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+        tasksListener?.remove()
+        adjustmentsListener?.remove()
+        attachListeners()
+    }
+
+    private fun attachListeners() {
         val uid = auth.currentUser?.uid ?: return
 
         tasksListener = firestore.collection("users").document(uid)
             .collection("completedTasks")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    _uiState.value = PointsHistoryUiState(error = error.message)
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = error.message)
                     return@addSnapshotListener
                 }
                 taskEvents = snapshot?.documents?.map { doc ->
@@ -86,7 +98,8 @@ class StudentPointsHistoryViewModel : ViewModel() {
         _uiState.value = PointsHistoryUiState(
             items = all,
             totalEarned = earned,
-            totalSpent = spent
+            totalSpent = spent,
+            isRefreshing = false
         )
     }
 

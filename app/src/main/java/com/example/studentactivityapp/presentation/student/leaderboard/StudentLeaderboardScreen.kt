@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.example.studentactivityapp.ui.components.appGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +74,11 @@ fun StudentLeaderboardScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
         )
 
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize()
+        ) {
         when {
             uiState.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -140,6 +146,7 @@ fun StudentLeaderboardScreen(
                     }
                 }
             }
+        }
         }
     }
 }

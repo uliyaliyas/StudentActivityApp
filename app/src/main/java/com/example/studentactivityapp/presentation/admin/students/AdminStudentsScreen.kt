@@ -40,10 +40,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.example.studentactivityapp.data.model.User
 import com.example.studentactivityapp.ui.components.InitialsAvatar
 import com.example.studentactivityapp.ui.components.appGradient
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminStudentsScreen(
     innerPadding: PaddingValues,
@@ -127,6 +130,11 @@ fun AdminStudentsScreen(
         val error = uiState.error
         val students = uiState.students
 
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize()
+        ) {
         when {
             isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -160,6 +168,7 @@ fun AdminStudentsScreen(
                     }
                 }
             }
+        }
         }
     }
 }

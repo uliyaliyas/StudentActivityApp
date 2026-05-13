@@ -23,6 +23,7 @@ data class AchievementItem(
 
 data class AchievementsUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val achievements: List<AchievementItem> = emptyList(),
     val unlockedCount: Int = 0,
     val error: String? = null
@@ -36,17 +37,29 @@ class StudentAchievementsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(AchievementsUiState())
     val uiState: StateFlow<AchievementsUiState> = _uiState.asStateFlow()
 
+    fun refresh() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+            loadAchievementsInternal()
+        }
+    }
+
     fun loadAchievements() {
         viewModelScope.launch {
             _uiState.value = AchievementsUiState(isLoading = true)
+            loadAchievementsInternal()
+        }
+    }
+
+    private suspend fun loadAchievementsInternal() {
 
             val user = userRepository.getCurrentUser().getOrNull()
             val completedTasks = taskRepository.getCompletedTasks().getOrNull() ?: emptyList()
             val redemptions = userRepository.getRedemptionHistory().getOrNull() ?: emptyList()
 
             if (user == null) {
-                _uiState.value = AchievementsUiState(error = "Не удалось загрузить данные")
-                return@launch
+                _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = "Не удалось загрузить данные")
+                return
             }
 
             val completedCount = completedTasks.size
@@ -132,6 +145,5 @@ class StudentAchievementsViewModel : ViewModel() {
                 achievements = achievements,
                 unlockedCount = achievements.count { it.isUnlocked }
             )
-        }
     }
 }
