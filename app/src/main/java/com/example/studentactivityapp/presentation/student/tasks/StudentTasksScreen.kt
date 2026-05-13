@@ -51,6 +51,7 @@ import java.util.Date
 import java.util.Locale
 import com.example.studentactivityapp.ui.components.appGradient
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentTasksScreen(
     innerPadding: PaddingValues,
