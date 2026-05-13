@@ -1,14 +1,12 @@
 package com.example.studentactivityapp.presentation.admin.students
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.studentactivityapp.data.FirebaseModule
 import com.example.studentactivityapp.data.model.User
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 data class AdminStudentsUiState(
     val isLoading: Boolean = false,
@@ -22,18 +20,24 @@ class AdminStudentsViewModel : ViewModel() {
 
     private val firestore = FirebaseModule.firestore
     private var allStudents: List<User> = emptyList()
+    private var studentsListener: ListenerRegistration? = null
 
     private val _uiState = MutableStateFlow(AdminStudentsUiState())
     val uiState: StateFlow<AdminStudentsUiState> = _uiState.asStateFlow()
 
-    fun loadStudents() {
-        viewModelScope.launch {
-            _uiState.value = AdminStudentsUiState(isLoading = true)
+    init {
+        startListening()
+    }
 
-            try {
-                val snapshot = firestore.collection("users").get().await()
-
-                allStudents = snapshot.documents.mapNotNull { doc ->
+    private fun startListening() {
+        _uiState.value = AdminStudentsUiState(isLoading = true)
+        studentsListener = firestore.collection("users")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    _uiState.value = AdminStudentsUiState(error = error.message)
+                    return@addSnapshotListener
+                }
+                allStudents = snapshot?.documents?.mapNotNull { doc ->
                     val role = doc.getString("role") ?: return@mapNotNull null
                     if (role != "student") return@mapNotNull null
                     User(
@@ -43,15 +47,12 @@ class AdminStudentsViewModel : ViewModel() {
                         role = role,
                         points = (doc.getLong("points") ?: 0).toInt()
                     )
-                }
-
+                } ?: emptyList()
                 applySearch(_uiState.value.searchQuery)
-
-            } catch (e: Exception) {
-                _uiState.value = AdminStudentsUiState(error = e.message)
             }
-        }
     }
+
+    fun loadStudents() { /* snapshot listener handles updates automatically */ }
 
     fun search(query: String) {
         applySearch(query)
@@ -72,5 +73,10 @@ class AdminStudentsViewModel : ViewModel() {
             searchQuery = query,
             totalCount = allStudents.size
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        studentsListener?.remove()
     }
 }

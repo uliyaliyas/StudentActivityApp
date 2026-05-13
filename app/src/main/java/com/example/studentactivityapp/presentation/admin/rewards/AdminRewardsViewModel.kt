@@ -2,8 +2,10 @@ package com.example.studentactivityapp.presentation.admin.rewards
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.studentactivityapp.data.FirebaseModule
 import com.example.studentactivityapp.data.model.Reward
 import com.example.studentactivityapp.data.repository.RewardRepository
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,24 +35,39 @@ data class AdminRewardsUiState(
 class AdminRewardsViewModel : ViewModel() {
 
     private val repository = RewardRepository()
+    private val firestore = FirebaseModule.firestore
     private var allRewards: List<Reward> = emptyList()
+    private var rewardsListener: ListenerRegistration? = null
 
     private val _uiState = MutableStateFlow(AdminRewardsUiState())
     val uiState: StateFlow<AdminRewardsUiState> = _uiState.asStateFlow()
 
-    fun loadRewards() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            repository.getAllRewards()
-                .onSuccess { rewards ->
-                    allRewards = rewards
-                    _uiState.value = _uiState.value.copy(isLoading = false, rewards = rewards)
-                }
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message ?: "Ошибка загрузки")
-                }
-        }
+    init {
+        startListening()
     }
+
+    private fun startListening() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        rewardsListener = firestore.collection("rewards")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
+                    return@addSnapshotListener
+                }
+                allRewards = snapshot?.documents?.map { doc ->
+                    Reward(
+                        id = doc.id,
+                        title = doc.getString("title") ?: "",
+                        description = doc.getString("description") ?: "",
+                        points = (doc.getLong("points") ?: 0).toInt(),
+                        iconName = doc.getString("iconName") ?: "gift"
+                    )
+                } ?: emptyList()
+                _uiState.value = _uiState.value.copy(isLoading = false, rewards = allRewards)
+            }
+    }
+
+    fun loadRewards() { /* snapshot listener handles updates automatically */ }
 
     fun openAddForm() {
         _uiState.value = _uiState.value.copy(showForm = true, form = RewardFormState())
@@ -103,7 +120,6 @@ class AdminRewardsViewModel : ViewModel() {
 
             result.onSuccess {
                 closeForm()
-                loadRewards()
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     form = _uiState.value.form.copy(isSaving = false, error = error.message ?: "Ошибка сохранения")
@@ -123,5 +139,10 @@ class AdminRewardsViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(rewards = allRewards, error = it.message ?: "Ошибка удаления")
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rewardsListener?.remove()
     }
 }

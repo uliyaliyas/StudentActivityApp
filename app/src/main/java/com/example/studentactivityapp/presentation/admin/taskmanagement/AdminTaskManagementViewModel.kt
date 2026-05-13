@@ -2,8 +2,10 @@ package com.example.studentactivityapp.presentation.admin.taskmanagement
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.studentactivityapp.data.FirebaseModule
 import com.example.studentactivityapp.data.model.Task
 import com.example.studentactivityapp.data.repository.TaskRepository
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,24 +36,39 @@ data class AdminTasksUiState(
 class AdminTaskManagementViewModel : ViewModel() {
 
     private val repository = TaskRepository()
+    private val firestore = FirebaseModule.firestore
     private var allTasks: List<Task> = emptyList()
+    private var tasksListener: ListenerRegistration? = null
 
     private val _uiState = MutableStateFlow(AdminTasksUiState())
     val uiState: StateFlow<AdminTasksUiState> = _uiState.asStateFlow()
 
-    fun loadTasks() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            repository.getAllTasks()
-                .onSuccess { tasks ->
-                    allTasks = tasks
-                    applySearch(_uiState.value.searchQuery)
-                }
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
-                }
-        }
+    init {
+        startListening()
     }
+
+    private fun startListening() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        tasksListener = firestore.collection("tasks")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
+                    return@addSnapshotListener
+                }
+                allTasks = snapshot?.documents?.map { doc ->
+                    Task(
+                        id = doc.id,
+                        title = doc.getString("title") ?: "",
+                        description = doc.getString("description") ?: "",
+                        points = (doc.getLong("points") ?: 0).toInt(),
+                        deadline = doc.getLong("deadline") ?: 0L
+                    )
+                } ?: emptyList()
+                applySearch(_uiState.value.searchQuery)
+            }
+    }
+
+    fun loadTasks() { /* snapshot listener handles updates automatically */ }
 
     fun search(query: String) {
         applySearch(query)
@@ -122,7 +139,6 @@ class AdminTaskManagementViewModel : ViewModel() {
 
             result.onSuccess {
                 closeForm()
-                loadTasks()
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     form = _uiState.value.form.copy(isSaving = false, error = error.message ?: "Ошибка сохранения")
@@ -143,5 +159,10 @@ class AdminTaskManagementViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(error = it.message ?: "Ошибка удаления")
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        tasksListener?.remove()
     }
 }
